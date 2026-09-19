@@ -64,27 +64,46 @@ Slogan : « Ijambo kuri bose »
 Félicitations, votre portail web SHIMA FM 95.9 est en ligne !
 `;
 
-      const htaccessContent = `# Redirection HTTPS et compression Apache cPanel
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+      const htaccessContent = `# ====================================================================
+# CONFIGURATION APACHE / CPANEL POUR SHIMA FM 95.9 (REACT SPA)
+# ====================================================================
 
-# Optimisation de la mise en cache navigateur
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType image/jpg "access plus 1 month"
-  ExpiresByType image/jpeg "access plus 1 month"
-  ExpiresByType image/gif "access plus 1 month"
-  ExpiresByType image/png "access plus 1 month"
-  ExpiresByType image/webp "access plus 1 month"
-  ExpiresByType text/css "access plus 1 month"
-  ExpiresByType application/javascript "access plus 1 month"
+# 1. Empêcher l'affichage du répertoire et options Apache
+Options -Indexes -MultiViews
+
+# 2. Réécriture d'URL et routage Single Page Application (SPA)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redirection de l'API stream audio vers le script PHP sur cPanel
+  RewriteRule ^api/stream/?$ stream.php [L,QSA]
+
+  # Si le fichier ou le dossier existe réellement, le servir directement
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Rediriger toutes les autres requêtes vers index.html pour React
+  RewriteRule ^ index.html [L]
 </IfModule>
 
-# Protection sécurité basique
-Header set X-Content-Type-Options "nosniff"
-Header set X-Frame-Options "SAMEORIGIN"
-Header set X-XSS-Protection "1; mode=block"
+# 3. Types MIME pour JavaScript ES Modules (résout l'écran blanc Vite)
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/javascript .js .mjs
+  AddType text/css .css
+  AddType image/svg+xml .svg .svgz
+  AddType image/webp .webp
+  AddType audio/mpeg .mp3
+  AddType application/json .json
+</IfModule>
+
+# 4. En-têtes CORS et sécurité
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>
 `;
 
       // Static HTML templates
@@ -258,38 +277,36 @@ if ($fp) {
         </div>
 
         <div className="py-5 space-y-4 text-xs text-slate-300">
-          <p className="leading-relaxed">
-            Ce générateur prépare et télécharge directement un fichier <strong>ZIP complet</strong> contenant tous les fichiers HTML, feuilles de style, script de stream radio, <code className="text-amber-400">sitemap.xml</code>, <code className="text-amber-400">robots.txt</code>, <code className="text-amber-400">.htaccess</code> et un guide d'installation étape par étape pour <strong>cPanel</strong>.
-          </p>
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-slate-200 space-y-2">
+            <h4 className="font-bold text-amber-400 text-sm flex items-center gap-2">
+              <span>⚠️ Pourquoi le site ne s'affichait pas sur cPanel ?</span>
+            </h4>
+            <ul className="space-y-1.5 text-[11px] text-slate-300 pl-4 list-disc">
+              <li><strong>Chemins absolus corrigés :</strong> Les scripts et styles sont désormais configurés avec des chemins relatifs (<code className="text-amber-300 font-mono">base: './'</code>), ce qui empêche l'écran blanc quand le site est dans un sous-dossier ou sur un sous-domaine cPanel.</li>
+              <li><strong>Fichier .htaccess ajouté :</strong> Indispensable pour Apache / LiteSpeed afin de servir les modules JavaScript (<code className="text-amber-300 font-mono">type="module"</code>) et rediriger les URL vers la page d'accueil sans erreur 404.</li>
+              <li><strong>Fichiers masqués dans cPanel :</strong> Dans le <em>Gestionnaire de fichiers cPanel</em>, cliquez sur <strong>Paramètres</strong> (en haut à droite) et cochez <strong>« Afficher les fichiers masqués (dotfiles) »</strong> pour que le fichier <code className="text-amber-300 font-mono">.htaccess</code> ne soit pas ignoré !</li>
+              <li><strong>Streaming audio live (stream.php) :</strong> Le script <code className="text-amber-300 font-mono">stream.php</code> inclus relaie le flux Icecast HTTP sur votre site HTTPS sans être bloqué par les navigateurs.</li>
+            </ul>
+          </div>
 
           <div className="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700 space-y-2">
             <div className="flex items-center gap-2 font-semibold text-white">
               <Server className="w-4 h-4 text-amber-400" />
-              <span>Contenu de l'archive prête pour cPanel :</span>
+              <span>Procédure pour publier sur cPanel :</span>
             </div>
-            <ul className="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300 pl-6 list-disc">
-              <li>index.html (Accueil)</li>
-              <li>actualites.html</li>
-              <li>burundi.html (18 prov.)</li>
-              <li>societe.html</li>
-              <li>politique.html</li>
-              <li>economie.html</li>
-              <li>culture.html</li>
-              <li>musique.html</li>
-              <li>sports.html</li>
-              <li>videos.html</li>
-              <li>emissions.html</li>
-              <li>animateurs.html</li>
-              <li>contact.html</li>
-              <li>.htaccess & robots.txt</li>
-            </ul>
+            <ol className="text-[11px] text-slate-300 pl-5 list-decimal space-y-1">
+              <li>Ouvrez le <strong>Gestionnaire de fichiers</strong> de cPanel.</li>
+              <li>Allez dans le dossier racine : <code className="text-amber-300">public_html/</code></li>
+              <li>Téléversez l'archive et extrayez-la directement dans <code className="text-amber-300">public_html/</code></li>
+              <li>Vérifiez la présence de <code className="text-emerald-400">index.html</code>, du dossier <code className="text-emerald-400">assets/</code> et du fichier <code className="text-emerald-400">.htaccess</code>.</li>
+            </ol>
           </div>
 
           {downloadSuccess && (
             <div className="bg-emerald-950/60 border border-emerald-500/50 rounded-xl p-3 flex items-center gap-2 text-emerald-300">
               <CheckCircle className="w-5 h-5 shrink-0 text-emerald-400" />
               <span>
-                <strong>Téléchargement réussi !</strong> Le fichier <code>SHIMA_FM_95.9_cPanel_Package.zip</code> a été généré et sauvegardé.
+                <strong>Téléchargement réussi !</strong> Le fichier <code>SHIMA_FM_95.9_cPanel_Package.zip</code> contient tous les correctifs cPanel.
               </span>
             </div>
           )}

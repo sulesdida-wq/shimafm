@@ -53,27 +53,28 @@ export const RadioPlayer: React.FC<RadioPlayerProps> = ({
     if (isPlaying) {
       setStreamError(null);
 
-      // Détecter l'URL du flux audio appropriée
-      // En HTTPS (navigateurs récents), le proxy local /api/stream est requis pour éviter le blocage Mixed Content
+      // Détecter l'URL du flux audio appropriée avec chaîne de repli robuste pour cPanel / Node
       const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-      const primaryUrl = isHttps ? RADIO_STREAM_URL : DIRECT_STREAM_URL;
-      const fallbackUrl = isHttps ? DIRECT_STREAM_URL : RADIO_STREAM_URL;
+      const streamCandidates: string[] = isHttps
+        ? ['/api/stream', 'stream.php', './stream.php', DIRECT_STREAM_URL]
+        : [DIRECT_STREAM_URL, '/api/stream', 'stream.php'];
+
+      let currentStreamIndex = 0;
 
       const audio = new Audio();
       audio.crossOrigin = 'anonymous';
       audio.preload = 'auto';
-      audio.src = primaryUrl;
+      audio.src = streamCandidates[currentStreamIndex];
 
-      let fallbackAttempted = false;
       audio.onerror = () => {
-        if (!fallbackAttempted && fallbackUrl && fallbackUrl !== primaryUrl) {
-          fallbackAttempted = true;
-          console.warn(`Bascule sur le flux audio alternatif: ${fallbackUrl}`);
-          audio.src = fallbackUrl;
+        currentStreamIndex++;
+        if (currentStreamIndex < streamCandidates.length) {
+          const nextUrl = streamCandidates[currentStreamIndex];
+          console.warn(`Tentative de connexion au flux alternatif (${currentStreamIndex + 1}/${streamCandidates.length}): ${nextUrl}`);
+          audio.src = nextUrl;
           audio.load();
           audio.play().catch((err) => {
-            console.warn("Erreur lecture flux alternatif:", err);
-            setStreamError("Impossible de charger le flux audio en direct.");
+            console.warn(`Erreur tentative ${nextUrl}:`, err);
           });
         } else {
           setStreamError("Flux temporairement indisponible.");

@@ -48,6 +48,7 @@ function audioStreamProxyPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
+    base: './',
     plugins: [react(), tailwindcss(), audioStreamProxyPlugin()],
     resolve: {
       alias: {
