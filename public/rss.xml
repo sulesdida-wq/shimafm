@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SHIMA FM 95.9 — Le fil d'actualités du Burundi</title>
+    <link>https://shimafm.org</link>
+    <description>Toutes les informations, actualités politiques, économiques, culturelles et sportives du Burundi par Radio Shima FM 95.9.</description>
+    <language>fr-BI</language>
+    <atom:link href="https://shimafm.org/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sommet économique de Bujumbura : Nouvelles opportunités pour la jeunesse burundaise</title>
+      <link>https://shimafm.org/article/sommet-economique-bujumbura-jeunesse</link>
+      <description>Le forum économique national réuni à Bujumbura met en avant l'entrepreneuriat agro-industriel et l'inclusion numérique.</description>
+      <pubDate>Wed, 16 Sep 2026 08:30:00 +0200</pubDate>
+      <category>Économie</category>
+    </item>
+    <item>
+      <title>Championnat National Primus Ligue : Les résultats chocs de la 12ème journée</title>
+      <link>https://shimafm.org/article/championnat-national-primus-ligue-resultats</link>
+      <description>Retour sur les rencontres décisives du week-end entre les cadors du football burundais.</description>
+      <pubDate>Tue, 15 Sep 2026 18:00:00 +0200</pubDate>
+      <category>Sports</category>
+    </item>
+  </channel>
+</rss>

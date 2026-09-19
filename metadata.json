@@ -1,0 +1,6 @@
+{
+  "name": "SHIMA FM 95.9 — Radio & Actualités du Burundi",
+  "description": "Portail officiel de Radio Shima FM 95.9 FM au Burundi : écoute en direct, dernières actualités nationales et internationales, culture, musique, sports et émissions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
